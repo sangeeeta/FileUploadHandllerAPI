@@ -34,7 +34,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // 4. Add Swagger services
 // ---------------------------
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); // ✅ This was missing
+builder.Services.AddSwaggerGen();
 
 // ---------------------------
 // 5. Register DI services
@@ -52,13 +52,20 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (db.Database.CanConnect())
+    try
     {
-        Console.WriteLine("PostgreSQL connection successful!");
+        if (db.Database.CanConnect())
+        {
+            Console.WriteLine("PostgreSQL connection successful!");
+        }
+        else
+        {
+            Console.WriteLine("PostgreSQL connection failed!");
+        }
     }
-    else
+    catch (Exception ex)
     {
-        Console.WriteLine("PostgreSQL connection failed!");
+        Console.WriteLine("DB connection exception: " + ex.Message);
     }
 }
 
@@ -72,12 +79,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "UploadFiles API v1");
-        c.RoutePrefix = "swagger"; // https://localhost:7098/swagger
+        c.RoutePrefix = "swagger"; // Swagger available at https://localhost:<port>/swagger
     });
 }
 
-app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
 app.UseAuthorization();
 app.MapControllers();
 

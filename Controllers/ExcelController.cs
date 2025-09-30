@@ -6,23 +6,25 @@ namespace UploadFiles.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PdfController : ControllerBase
+    public class ExcelController : ControllerBase
     {
         private readonly IFileService _fileService;
-        public PdfController(IFileService fileService)
+        private static readonly string[] allowedExtensions = new string[] { ".xls", ".xlsx" };
+
+        public ExcelController(IFileService fileService)
         {
             _fileService = fileService;
         }
 
-        [HttpPost("uploadPdf")]
+        [HttpPost("uploadExcel")]
         public async Task<IActionResult> UploadPdf(IFormFile file)
         {
             try
             {
                 var fileUrl = await _fileService.UploadFileAsync(
                     file,
-                    "pdf",
-                    new[] { ".pdf" });
+                    "excel",
+                    allowedExtensions);
 
                 return Ok(new { message = "PDF uploaded successfully!", fileUrl });
             }
@@ -33,3 +35,4 @@ namespace UploadFiles.Controllers
         }
     }
 }
+
